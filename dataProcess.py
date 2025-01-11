@@ -274,7 +274,7 @@ def split_train_val(image_paths, label_paths, val_index=0):
             train_label_paths.append(label_paths[i])
     print("Number of training images: ", len(train_image_paths))
     print("Number of val images: ", len(val_image_paths))
-    # print("val:", val_image_paths)
+    print("val:", val_image_paths)
     
     return train_image_paths, train_label_paths, val_image_paths, val_label_paths
 
