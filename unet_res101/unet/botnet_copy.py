@@ -21,9 +21,9 @@ class BotNetEncoder(nn.Module):
             activation=nn.ReLU()
         )
         self.out_channels = [256, 512, 1024, 2048]  # Example, adjust based on your layers
-
+#
     def forward(self, x):
-        # Implement forward pass, returning a list of feature maps
+        #Implement forward pass, returning a list of feature maps
         features = []
         """
         [Identity(), 
