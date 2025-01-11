@@ -4,7 +4,7 @@ Created on Sun Feb  7 22:04:28 2021
 
 @author: DELL
 """
-###
+####
 import torch.utils.data as D
 from torchvision import transforms as T
 from PIL import ImageFilter, Image, ImageOps
@@ -82,21 +82,19 @@ def RandomScaleCrop(image, lable):
     return img, mask
 
 
-#  随机数据增强
-#  image 图像
-#  label 标签
+
 def DataAugmentation(image, label, mode):
     if(mode == "train"):
         image = cv2.resize(image, dsize=(512, 512), interpolation=cv2.INTER_NEAREST)
         label = cv2.resize(label, dsize=(512, 512), interpolation=cv2.INTER_NEAREST)
         hor = random.choice([True, False])
         if(hor):
-            #  图像水平翻转
+
             image = np.flip(image, axis = 1)
             label = np.flip(label, axis = 1)
         ver = random.choice([True, False])
         if(ver):
-            #  图像垂直翻转
+
             image = np.flip(image, axis = 0)
             label = np.flip(label, axis = 0)
         crop = random.choice([True, False])
@@ -114,20 +112,18 @@ def DataAugmentation(image, label, mode):
         label = cv2.resize(label, dsize=(512, 512), interpolation=cv2.INTER_NEAREST)
         # stretch = random.choice([0.8, 1, 2])
     # if(stretch == 'yes'):
-        # 0.5%线性拉伸
+
         # image = truncated_linear_stretch(image, stretch)
     return image, label
 
-#  验证集不需要梯度计算,加速和节省gpu空间
+
 @torch.no_grad()
-# 计算验证集Iou
+
 def cal_val_iou(model, loader):
     val_iou = []
     val_acc = []
     val_f1 = []
-    # 需要加上model.eval()
-    # 否则的话，有输入数据，即使不训练，它也会改变权值
-    # 这是model中含有BN和Dropout所带来的的性质
+
     model.eval()
     val_data_loader_num = iter(loader)
     for image, target in tqdm(val_data_loader_num):
@@ -162,7 +158,7 @@ def cal_binary_f1(pred, mask):
     f1_result.append(f1)
     return np.stack(f1_result)
 
-# 计算IoU
+
 def cal_iou(pred, mask, c=1):
     iou_result = []
     for idx in range(c):
@@ -174,7 +170,7 @@ def cal_iou(pred, mask, c=1):
         # print('uion:', uion)
         overlap = (p*t).sum()
         print('over:',overlap)
-        #  0.0001防止除零
+
         iou = 2*overlap/(uion + 0.0001)
         iou_result.append(iou.abs().data.cpu().numpy())
         print('iou:',iou_result)
@@ -190,7 +186,7 @@ def cal_binary_iou(pred, mask, c=1):
     # print('uion:', uion)
     overlap = (p * t).sum()
     # print('over:', overlap)
-    #  0.0001防止除零
+
     iou = 2 * overlap / (uion + 0.0001)
     iou_result.append(iou.abs().data.cpu().numpy())
     return np.stack(iou_result)
@@ -213,7 +209,7 @@ class OurDataset(D.Dataset):
         self.mode = mode
         self.len = len(image_paths)
         self.as_tensor = T.Compose([
-            # 将numpy的ndarray转换成形状为(C,H,W)的Tensor格式,且/255归一化到[0,1.0]之间
+
             T.ToTensor(),
         ])
     # 获取数据操作
@@ -224,7 +220,7 @@ class OurDataset(D.Dataset):
         if self.mode == "train":
             # print(self.label_paths[index])
             image, label = DataAugmentation(image, label, self.mode)
-            #  传入一个内存连续的array对象,pytorch要求传入的numpy的array对象必须是内存连续
+
             image = np.array(image, np.float32) / 255.0
             image_array = np.ascontiguousarray(image)
             image = self.as_tensor(image_array)
@@ -236,7 +232,7 @@ class OurDataset(D.Dataset):
             # print(label.shape)
             return image, self.as_tensor(label)
         elif self.mode == "val":
-            # 常规来讲,验证集不需要数据增强,但是这次数据测试集和训练集不同域,为了模拟不同域,验证集也进行数据增强
+
             image, label = DataAugmentation(image, label, self.mode)
             image = np.array(image, np.float32) / 255.0
             image_array = np.ascontiguousarray(image)
@@ -252,7 +248,7 @@ class OurDataset(D.Dataset):
         elif self.mode == "test":   
             image_stretch = truncated_linear_stretch(image, 0.5)
             return self.as_tensor(image), self.as_tensor(image_stretch), self.image_paths[index]
-    # 数据集数量
+
     def __len__(self):
         return self.len
 
@@ -266,18 +262,19 @@ def get_dataloader(image_paths, label_paths, mode, batch_size,
 
 
 def split_train_val(image_paths, label_paths, val_index=0):
-    # 分隔训练集和验证集
+
     train_image_paths, train_label_paths, val_image_paths, val_label_paths = [], [], [], []
     for i in range(len(image_paths)):
-        # 训练验证4:1,即每5个数据的第val_index个数据为验证集
+
         if i % 4 == val_index:
             val_image_paths.append(image_paths[i])
             val_label_paths.append(label_paths[i])
         else:
             train_image_paths.append(image_paths[i])
             train_label_paths.append(label_paths[i])
-    print("Number of train images: ", len(train_image_paths))
+    print("Number of training images: ", len(train_image_paths))
     print("Number of val images: ", len(val_image_paths))
     # print("val:", val_image_paths)
+    
     return train_image_paths, train_label_paths, val_image_paths, val_label_paths
 
