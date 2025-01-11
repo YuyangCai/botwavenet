@@ -7,7 +7,7 @@ from dataProcess import get_dataloader, cal_val_iou, split_train_val
 from tqdm import tqdm
 import segmentation_models_pytorch as smp
 import glob
-
+#
 from unet_res101.unet.model_no_bot import Unet #消融实验 没有bot只有se
 from segmentation_models_pytorch.losses import DiceLoss, SoftCrossEntropyLoss, LovaszLoss
 # from ESFNet.ESFNet import ESFNet
@@ -287,3 +287,4 @@ if __name__ == '__main__':
         plt.legend()
         plt.savefig("learning rate.png", dpi = 300)
         plt.show()
+print("Training is ok")
