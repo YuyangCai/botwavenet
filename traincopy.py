@@ -225,5 +225,5 @@ if __name__ == '__main__':
         plt.legend()
         plt.savefig("learning rate.png", dpi = 300)
         plt.show()
-print("training_done")
+print("training is ok")
 #
